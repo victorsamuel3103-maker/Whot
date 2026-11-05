@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHOT MASTER</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 16px;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #214638, #071c17 75%);
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.app {
+    max-width: 950px;
+    margin: auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    color: #ffd65b;
+    font-size: 35px;
+    letter-spacing: 3px;
+    margin-bottom: 5px;
+}
+
+header p {
+    color: #b7d6c6;
+    font-size: 13px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: #173d30;
+    border: 1px solid #376c50;
+    padding: 13px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+}
+
+.topbar strong { color: #ffda65; }
+
+button {
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 12px 17px;
+    font-weight: bold;
+    background: #ffd45b;
+    color: #172b20;
+}
+
+button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.secondary {
+    background: #285440;
+    color: white;
+}
+
+.game-area {
+    background: #123729;
+    border: 1px solid #397051;
+    border-radius: 18px;
+    padding: 16px;
+    overflow: hidden;
+}
+
+.player-area {
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    background: #1a4936;
+    margin-bottom: 15px;
+}
+
+.player-area.active {
+    outline: 2px solid #ffd65b;
+}
+
+.player-area h3 {
+    margin: 5px;
+    color: #ffdc6b;
+}
+
+.hand {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 9px;
+    min-height: 110px;
+    align-items: center;
+}
+
+.card {
+    width: 66px;
+    height: 96px;
+    background: #fff;
+    color: #17251e;
+    border: 3px solid #e8d9a5;
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px #0005;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.card .number {
+    font-size: 23px;
+}
+
+.card .shape {
+    font-size: 26px;
+    margin-top: 5px;
+}
+
+.card small {
+    font-size: 9px;
+    margin-top: 4px;
+}
+
+.card.playable {
+    cursor: pointer;
+    border-color: #ffd34d;
+    box-shadow: 0 0 12px #ffdf6b88;
+    transform: translateY(-3px);
+}
+
+.card.playable:hover {
+    transform: translateY(-9px);
+}
+
+.card.back {
+    background: repeating-linear-gradient(
+        45deg, #173c31, #173c31 7px,
+        #245c42 7px, #245c42 14px
+    );
+    border: 3px solid #e8ca65;
+    color: #ffd75b;
+    font-size: 24px;
+}
+
+.center {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    margin: 22px 0;
+}
+
+.pile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.info {
+    color: #b8d6c7;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.status {
+    text-align: center;
+    padding: 14px;
+    background: #0b291f;
+    border: 1px solid #37664c;
+    border-radius: 12px;
+    margin: 15px 0;
+    min-height: 54px;
+    color: #ffdf75;
+    font-weight: bold;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: #000b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+    padding: 18px;
+}
+
+.overlay.hidden { display: none; }
+
+.modal {
+    width: 100%;
+    max-width: 420px;
+    background: #173e30;
+    border: 1px solid #618b63;
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 15px 50px #0009;
+}
+
+.modal h2 {
+    color: #ffdb66;
+    font-size: 27px;
+}
+
+.modal p {
+    color: #d1e8d9;
+    line-height: 1.6;
+}
+
+.modal button {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 15px;
+}
+
+.suits {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.suits button {
+    width: 60px;
+    height: 60px;
+    font-size: 27px;
+    padding: 5px;
+}
+
+.rules {
+    margin-top: 20px;
+    color: #b9d1c3;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+@media(max-width: 500px) {
+    body { padding: 9px; }
+    header h1 { font-size: 28px; }
+    .card { width: 53px; height: 82px; }
+    .card .number { font-size: 20px; }
+    .card .shape { font-size: 21px; }
+    .game-area { padding: 9px; }
+    .center { gap: 3px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+    <h1>🃏 WHOT MASTER</h1>
+    <p>THE ULTIMATE CARD BATTLE</p>
+</header>
+
+<div class="topbar">
+    <div>🪙 Coins: <strong id="coins">100</strong></div>
+    <div>🏆 Wins: <strong id="wins">0</strong></div>
+    <button class="secondary" onclick="showRules()">HOW TO PLAY</button>
+</div>
+
+<div class="game-area">
+
+    <div class="player-area" id="opponentArea">
+        <h3 id="opponentName">🤖 Computer</h3>
+        <div class="hand" id="opponentHand"></div>
+        <small id="opponentCount">Cards: 6</small>
+    </div>
+
+    <div class="center">
+
+        <div>
+            <div class="info">DRAW PILE</div>
+            <div class="pile">
+                <button class="card back" onclick="drawCard()">🃏</button>
+            </div>
+            <div class="info" id="drawCount">Cards remaining</div>
+        </div>
+
+        <div>
+            <div class="info">TOP CARD</div>
+            <div class="pile" id="topCard"></div>
+            <div class="info" id="currentSuit"></div>
+        </div>
+
+        <div>
+            <div class="info">TURN</div>
+            <div style="font-size:25px;margin:12px" id="turnIcon">👤</div>
+            <div class="info" id="turnName">Your turn</div>
+        </div>
+
+    </div>
+
+    <div class="status" id="status">
+        Welcome to WHOT MASTER! Start a new game.
+    </div>
+
+    <div class="actions">
+        <button onclick="drawCard()" id="drawButton">➕ DRAW CARD</button>
+        <button class="secondary" onclick="newGame()">↻ NEW GAME</button>
+    </div>
+
+    <div class="player-area active" id="playerArea">
+        <h3>👤 YOUR CARDS</h3>
+        <div class="hand" id="playerHand"></div>
+        <small id="playerCount">Cards: 6</small>
+    </div>
+
+</div>
+
+<div class="rules">
+    MATCH THE NUMBER OR SHAPE TO PLAY A CARD.<br>
+    WHOT 20 lets you choose the next shape.<br>
+    Special effects are displayed when triggered.
+</div>
+
+</div>
+
+<div class="overlay" id="overlay">
+    <div class="modal">
+        <h2 id="modalTitle">WELCOME TO WHOT!</h2>
+        <p id="modalText">Choose your game mode and challenge your opponent.</p>
+        <button onclick="startGame('computer')">🤖 PLAY AGAINST COMPUTER</button>
+        <button onclick="startGame('local')">👥 TWO PLAYERS (SAME DEVICE)</button>
+    </div>
+</div>
+
+<div class="overlay hidden" id="suitModal">
+    <div class="modal">
+        <h2>CHOOSE YOUR SHAPE</h2>
+        <p>Which shape should the next player match?</p>
+        <div class="suits">
+            <button onclick="chooseSuit('Circle')">🔵</button>
+            <button onclick="chooseSuit('Triangle')">🔺</button>
+            <button onclick="chooseSuit('Cross')">✚</button>
+            <button onclick="chooseSuit('Square')">🟪</button>
+            <button onclick="chooseSuit('Star')">⭐</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const suits = {
+    Circle: "●",
+    Triangle: "▲",
+    Cross: "✚",
+    Square: "■",
+    Star: "★"
+};
+
+const suitNames = Object.keys(suits);
+
+let deck = [];
+let discard = [];
+let hands = [[], []];
+
+let current = 0;
+let mode = "computer";
+let direction = 1;
+let finished = false;
+let choosing = false;
+let pending = 0;
+
+let coins = Number(localStorage.getItem("whotCoins")) || 100;
+let wins = Number(localStorage.getItem("whotWins")) || 0;
+
+let soundOn = true;
+let audio;
+
+const $ = id => document.getElementById(id);
+
+function saveStats() {
+    localStorage.setItem("whotCoins", coins);
+    localStorage.setItem("whotWins", wins);
+    $("coins").textContent = coins;
+    $("wins").textContent = wins;
+}
+
+function sound(freq = 500) {
+    if (!soundOn) return;
+    try {
+        audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+        if (audio.state === "suspended") audio.resume();
+
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.frequency.value = freq;
+        gain.gain.value = 0.05;
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start();
+        osc.stop(audio.currentTime + 0.12);
+    } catch(e) {}
+}
+
+function makeCard(suit, value) {
+    return {suit, value};
+}
+
+function buildDeck() {
+    deck = [];
+
+    for (const suit of suitNames) {
+        for (let value = 1; value <= 14; value++) {
+            deck.push(makeCard(suit, value));
+        }
+    }
+
+    for (let i = 0; i < 5; i++) {
+        deck.push(makeCard("WHOT", 20));
+    }
+
+    shuffle(deck);
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function startGame(selectedMode) {
+    mode = selectedMode;
+    buildDeck();
+
+    hands = [[], []];
+    discard = [];
+    current = 0;
+    direction = 1;
+    finished = false;
+    choosing = false;
+    pending = 0;
+
+    for (let i = 0; i < 6; i++) {
+        hands[0].push(deck.pop());
+        hands[1].push(deck.pop());
+    }
+
+    let first = deck.pop();
+
+    while (first.value === 20) {
+        deck.unshift(first);
+        shuffle(deck);
+        first = deck.pop();
+    }
+
+    discard.push(first);
+
+    $("overlay").classList.add("hidden");
+    $("suitModal").classList.add("hidden");
+    $("opponentName").textContent =
+        mode === "computer" ? "🤖 COMPUTER" : "👤 PLAYER 2";
+
+    say("Game started! Match the top card.");
+    render();
+
+    if (mode === "computer" && current === 1) computerTurn();
+}
+
+function newGame() {
+    $("overlay").classList.remove("hidden");
+}
+
+function cardHTML(card, clickable = false, index = -1) {
+    const symbol = card.suit === "WHOT" ? "🃏" : suits[card.suit];
+    const label = card.suit === "WHOT" ? "WHOT" : card.suit;
+
+    return `
+    <div class="card ${clickable ? "playable" : ""}"
+         ${clickable ? `onclick="playCard(${index})"` : ""}>
+        <div class="number">${card.value}</div>
+        <div class="shape">${symbol}</div>
+        <small>${label}</small>
+    </div>`;
+}
+
+function canPlay(card) {
+    const top = discard[discard.length - 1];
+
+    return card.suit === "WHOT" ||
+           card.suit === top.suit ||
+           card.value === top.value;
+}
+
+function render() {
+    const player = hands[0];
+    const opponent = hands[1];
+
+    $("playerHand").innerHTML = player.map((card, i) =>
+        cardHTML(card, current === 0 && !finished && !choosing &&
+        canPlay(card), i)
+    ).join("");
+
+    $("opponentHand").innerHTML = mode === "computer"
+        ? opponent.map(() => '<div class="card back">🃏</div>').join("")
+        : opponent.map(c => cardHTML(c)).join("");
+
+    $("playerCount").textContent = "Cards: " + player.length;
+    $("opponentCount").textContent = "Cards: " + opponent.length;
+
+    const top = discard[discard.length - 1];
+    $("topCard").innerHTML = cardHTML(top);
+    $("currentSuit").textContent =
+        "Shape: " + (top.suit === "WHOT" ? "WHOT" : top.suit);
+
+    $("drawCount").textContent = deck.length + " remaining";
+
+    $("turnIcon").textContent = current === 0 ? "👤" : "🤖";
+    $("turnName").textContent =
+        current === 0 ? "Your turn" :
+        mode === "computer" ? "Computer turn" : "Player 2 turn";
+
+    $("playerArea").classList.toggle("active", current === 0);
+    $("opponentArea").classList.toggle("active", current === 1);
+
+    $("drawButton").disabled = finished || choosing ||
+        (mode === "computer" && current === 1);
+}
+
+function say(message) {
+    $("status").textContent = message;
+}
+
+function nextPlayer() {
+    current = 1 - current;
+    render();
+
+    if (!finished && mode === "computer" && current === 1) {
+        setTimeout(computerTurn, 750);
+    }
+}
+
+function replenishDeck() {
+    if (deck.length === 0 && discard.length > 1) {
+        const top = discard.pop();
+        deck = discard;
+        discard = [top];
+        shuffle(deck);
+    }
+}
+
+function drawOne(player) {
+    replenishDeck();
+
+    if (deck.length > 0) {
+        hands[player].push(deck.pop());
+        return true;
+    }
+
+    return false;
+}
+
+function drawCard() {
+    if (finished || choosing || current !== 0) return;
+
+    let amount = pending > 0 ? pending : 1;
+
+    for (let i = 0; i < amount; i++) {
+        drawOne(current);
+    }
+
+    if (pending > 0) {
+        say("You collected " + amount + " penalty cards.");
+        pending = 0;
+    } else {
+        say("You picked a card. Your turn is over.");
+    }
+
+    sound(300);
+    nextPlayer();
+}
+
+function playCard(index) {
+    if (finished || choosing || current !== 0) return;
+
+    const card = hands[0][index];
+
+    if (!canPlay(card)) {
+        say("You cannot play that card. Match its shape or number!");
+        return;
+    }
+
+    placeCard(0, index);
+}
+
+function placeCard(player, index) {
+    const card = hands[player].splice(index, 1)[0];
+
+    discard.push(card);
+    sound(650);
+
+    if (hands[player].length === 0) {
+        finishGame(player);
+        return;
+    }
+
+    let message =
+        (player === 0 ? "You" :
+        mode === "computer" ? "Computer" : "Player 2") +
+        " played " + card.suit + " " + card.value + ".";
+
+    if (card.value === 20) {
+        if (player === 0) {
+            choosing = true;
+            render();
+            $("suitModal").classList.remove("hidden");
+            say("WHOT! Choose the next shape.");
+            return;
+        } else {
+            const counts = {};
+            for (const c of hands[1]) {
+                if (c.suit !== "WHOT") {
+                    counts[c.suit] = (counts[c.suit] || 0) + 1;
+                }
+            }
+
+            const bestSuit = Object.keys(counts).sort(
+                (a,b) => (counts[b] || 0) - (counts[a] || 0)
+            )[0] || suitNames[Math.floor(Math.random()*5)];
+
+            card.suit = "WHOT";
+            discard[discard.length - 1].chosenSuit = bestSuit;
+            message += " Chose " + bestSuit + ".";
+        }
+    }
+
+    if (card.value === 2) {
+        pending += 2;
+        message += " PICK TWO!";
+    }
+
+    if (card.value === 5) {
+        pending += 3;
+        message += " PICK THREE!";
+    }
+
+    if (card.value === 1) {
+        message += " HOLD ON!";
+        say(message);
+        render();
+        return;
+    }
+
+    if (card.value === 8) {
+        message += " SUSPEND!";
+        say(message);
+        render();
+        return;
+    }
+
+    if (card.value === 14) {
+        const other = 1 - player;
+        drawOne(other);
+        message += " GENERAL MARKET: opponent collects one card!";
+    }
+
+    say(message);
+    render();
+
+    if (pending > 0) {
+        setTimeout(() => {
+            if (!finished) {
+                current = 1 - player;
+                render();
+                if (mode === "computer" && current === 1) computerTurn();
+            }
+        }, 350);
+    } else {
+        nextPlayer();
+    }
+}
+
+function chooseSuit(suit) {
+    if (!choosing) return;
+
+    choosing = false;
+    $("suitModal").classList.add("hidden");
+
+    discard[discard.length - 1].chosenSuit = suit;
+    say("You chose " + suit + "!");
+
+    nextPlayer();
+}
+
+function computerTurn() {
+    if (finished || current !== 1 || mode !== "computer") return;
+
+    if (pending > 0) {
+        const amount = pending;
+        for (let i = 0; i < amount; i++) drawOne(1);
+        pending = 0;
+        say("Computer collected " + amount + " penalty cards.");
+        nextPlayer();
+        return;
+    }
+
+    const hand = hands[1];
+    const playable = hand.map((c,i) => ({c,i})).filter(x => canPlay(x.c));
+
+    if (playable.length === 0) {
+        drawOne(1);
+        say("Computer picked a card.");
+        nextPlayer();
+        return;
+    }
+
+    const chosen = playable.find(x => x.c.value === 20) ||
+        playable.find(x => x.c.value === 2 || x.c.value === 5) ||
+        playable[0];
+
+    say("Computer is playing...");
+    setTimeout(() => {
+        if (!finished && current === 1) {
+            placeCard(1, chosen.i);
+        }
+    }, 500);
+}
+
+function finishGame(player) {
+    finished = true;
+
+    let message;
+
+    if (mode === "local") {
+        message = player === 0 ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!";
+    } else {
+        message = player === 0 ? "YOU WIN! 🎉" : "COMPUTER WINS!";
+    }
+
+    if (player === 0) {
+        coins += 25;
+        wins++;
+        saveStats();
+        message += " You earned 25 coins!";
+    }
+
+    say(message);
+    render();
+
+    setTimeout(() => {
+        $("modalTitle").textContent = message;
+        $("modalText").textContent =
+            "The game is over. Start another match and challenge your opponent!";
+        $("overlay").classList.remove("hidden");
+    }, 500);
+}
+
+function showRules() {
+    $("modalTitle").textContent = "HOW TO PLAY WHOT";
+    $("modalText").innerHTML =
+        "Match the top card by shape or number.<br><br>" +
+        "1 = Hold On (play again)<br>" +
+        "2 = Opponent picks two<br>" +
+        "5 = Opponent picks three<br>" +
+        "8 = Suspend (skip opponent)<br>" +
+        "14 = General Market (opponent picks one)<br>" +
+        "20 = Choose a shape.<br><br>" +
+        "The first player to finish all their cards wins.";
+
+    $("overlay").classList.remove("hidden");
+}
+
+saveStats();
+</script>
+
+</body>
+</html>
